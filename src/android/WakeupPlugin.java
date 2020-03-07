@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.provider.Settings;
+import android.net.Uri;
 
 public class WakeupPlugin extends CordovaPlugin {
 	public static int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE= 2323;
@@ -50,6 +51,8 @@ public class WakeupPlugin extends CordovaPlugin {
 	};
 
 	public static CallbackContext connectionCallbackContext;
+
+	private CallbackContext requestPermissionCallbackContext;
 
   @Override
   public void onReset() {
@@ -97,12 +100,25 @@ public class WakeupPlugin extends CordovaPlugin {
 				pluginResult.setKeepCallback(true);
 				callbackContext.sendPluginResult(pluginResult);
 			} else if(action.equalsIgnoreCase("requestPermissions")) {
-				if (!Settings.canDrawOverlays(this)) {
-						Log.d(LOG_TAG, "requesting permissions...");
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + cordova.getActivity().getApplicationContext().getPackageName()));
-            startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE);
-        }
+				Context context = cordova.getActivity().getApplicationContext();
+				if (!Settings.canDrawOverlays(context)) {
+					Log.d(LOG_TAG, "requesting permissions...");
+					Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+									Uri.parse("package:" + context.getPackageName()));
+					this.requestPermissionCallbackContext = callbackContext;
+					cordova.startActivityForResult(this, intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE);
+        } else {
+					try {
+						JSONObject resultObject = new JSONObject();
+						resultObject.put("canDrawOverlays", true);
+						PluginResult pluginResult  = new PluginResult(PluginResult.Status.OK, resultObject);
+						pluginResult.setKeepCallback(true);
+						callbackContext.sendPluginResult(pluginResult);
+					} catch (JSONException jsonException) {
+						Log.d(LOG_TAG, "error responding when querying permissions");
+						ret = false;
+					}
+				}
 			} else {
 				PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, LOG_TAG + " error: invalid action (" + action + ")");
 				pluginResult.setKeepCallback(true);
@@ -121,6 +137,26 @@ public class WakeupPlugin extends CordovaPlugin {
 			ret = false;
 		}
 		return ret;
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if (requestCode == ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE) {
+				Context context = cordova.getActivity().getApplicationContext();
+				JSONObject resultObject = new JSONObject();
+				try {
+					resultObject.put("canDrawOverlays", Settings.canDrawOverlays(context));
+				} catch (JSONException jsonException) {
+					Log.d(LOG_TAG, "error responding to activity result when querying permissions");
+					this.requestPermissionCallbackContext = null;
+					return;
+				}
+				PluginResult pluginResult  = new PluginResult(PluginResult.Status.OK, resultObject);
+				pluginResult.setKeepCallback(true);
+				this.requestPermissionCallbackContext.sendPluginResult(pluginResult);
+				this.requestPermissionCallbackContext = null;
+		}
 	}
 
   public static void setAlarmsFromPrefs(Context context) {

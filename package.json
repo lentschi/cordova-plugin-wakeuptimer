@@ -1,7 +1,7 @@
 {
   "name": "cordova-plugin-wakeuptimer",
   "version": "0.1.0",
-  "description": "Wakeup Plugin",
+  "description": "Wakeup Plugin (FORK by lentschi!)",
   "cordova": {
     "id": "org.nypr.cordova.wakeupplugin",
     "platforms": [
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wnyc/cordova-plugin-wakeuptimer.git"
+    "url": "https://github.com/lentschi/cordova-plugin-wakeuptimer.git"
   },
   "keywords": [
     "sleep",
@@ -24,7 +24,7 @@
   "author": "nypr",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/wnyc/cordova-plugin-wakeuptimer/issues"
+    "url": "https://github.com/lentschi/cordova-plugin-wakeuptimer/issues"
   },
-  "homepage": "https://github.com/wnyc/cordova-plugin-wakeuptimer#readme"
+  "homepage": "https://github.com/lentschi/cordova-plugin-wakeuptimer#readme"
 }
