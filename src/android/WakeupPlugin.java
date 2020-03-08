@@ -101,7 +101,7 @@ public class WakeupPlugin extends CordovaPlugin {
 				callbackContext.sendPluginResult(pluginResult);
 			} else if(action.equalsIgnoreCase("requestPermissions")) {
 				Context context = cordova.getActivity().getApplicationContext();
-				if (!Settings.canDrawOverlays(context)) {
+				if (Build.VERSION.SDK_INT >= 29 && !Settings.canDrawOverlays(context)) {
 					Log.d(LOG_TAG, "requesting permissions...");
 					Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
 									Uri.parse("package:" + context.getPackageName()));
